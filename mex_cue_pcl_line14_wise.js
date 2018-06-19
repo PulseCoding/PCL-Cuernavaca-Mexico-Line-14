@@ -254,10 +254,10 @@ try {
   fs.appendFileSync("error_connection.log", err + '\n');
 }
 
-var joinWord = function(num1, num2) {
+var joinWord = function( num1, num2) {
   var bits = "00000000000000000000000000000000";
-  var bin1 = num1.toString(2),
-    bin2 = num2.toString(2),
+  var bin1 = Number(num1).toString(2),
+    bin2 = Number(num2).toString(2),
     newNum = bits.split("");
 
   for (i = 0; i < bin1.length; i++) {
@@ -314,7 +314,7 @@ client1.on('connect', function(err) {
         LabellerBlock = resp.coils[3];
         DepuckerBlock = resp.coils[2];
         CapperWait = resp.coils[6];
-        console.log(resp);
+        //console.log(resp);
         //console.log(resp);
 
       }, console.error);
