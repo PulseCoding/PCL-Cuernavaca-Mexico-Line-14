@@ -200,11 +200,6 @@ var CaseSealerct = null,
   CaseSelaerWait;
   var CntOutEOL=null,
       secEOL=0;
-var pubnub = new PubNub({
-  publishKey: "pub-c-8d024e5b-23bc-4ce8-ab68-b39b00347dfb",
-  subscribeKey: "sub-c-c3b3aa54-b44b-11e7-895e-c6a8ff6a3d85",
-  uuid: "CUE_PCL_LINE14"
-});
 
 var client1 = modbus.client.tcp.complete({
   'host': "192.168.10.116",
@@ -231,13 +226,20 @@ var client3 = modbus.client.tcp.complete({
   'reconnectTimeout': 30000
 });
 var client4 = modbus.client.tcp.complete({
-  'host': "192.168.10.109",
+  'host': "192.168.10.115",
   'port': 502,
   'autoReconnect': true,
   'timeout': 60000,
   'logEnabled': true,
   'reconnectTimeout': 30000
 });
+
+var pubnub = new PubNub({
+  publishKey: "pub-c-8d024e5b-23bc-4ce8-ab68-b39b00347dfb",
+  subscribeKey: "sub-c-c3b3aa54-b44b-11e7-895e-c6a8ff6a3d85",
+  uuid: "CUE_PCL_LINE14"
+});
+
 var senderData = function() {
   pubnub.publish(publishConfig, function(status, response) {});
 };
