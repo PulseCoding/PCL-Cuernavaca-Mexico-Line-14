@@ -179,7 +179,7 @@ var CasePackerct = null,
     }
   })()
 
-
+var secPubNub=0;
 var CaseSealerct = null,
   CaseSealerresults = null,
   CntInCaseSealer = null,
