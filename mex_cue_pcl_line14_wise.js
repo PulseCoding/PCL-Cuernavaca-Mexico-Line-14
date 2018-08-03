@@ -320,8 +320,8 @@ client1.on('connect', function(err) {
       }, console.error);
 
       client1.readHoldingRegisters(0, 15).then(function(resp) {
-        CntInLabeller = joinWord(resp.register[2], resp.register[3]);
-        CntOutLabeller = joinWord(resp.register[0], resp.register[1]);
+        CntInLabeller = joinWord(resp.register[10], resp.register[11]);
+        CntOutLabeller = joinWord(resp.register[8], resp.register[9]);
         CntInCapper = joinWord(resp.register[14], resp.register[15]);
         //------------------------------------------Labeller----------------------------------------------
         Labellerct = CntOutLabeller // NOTE: igualar al contador de salida
@@ -679,6 +679,8 @@ client3.on('connect', function(err) {
       client3.readHoldingRegisters(0, 15).then(function(resp) {
         CntOutCasePacker = joinWord(resp.register[6], resp.register[7]);
         CntInCasePacker = joinWord(resp.register[12], resp.register[13]);
+        CntInCaseFormer = joinWord(resp.register[8], resp.register[9]);
+        CntOutCaseFormer = joinWord(resp.register[10], resp.register[11]);
 
         //------------------------------------------CaseFormer----------------------------------------------
         CaseFormerct = CntOutCaseFormer // NOTE: igualar al contador de salida
