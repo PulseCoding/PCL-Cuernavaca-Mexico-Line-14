@@ -323,6 +323,7 @@ client1.on('connect', function(err) {
         CntInLabeller = joinWord(resp.register[10], resp.register[11]);
         CntOutLabeller = joinWord(resp.register[8], resp.register[9]);
         CntInCapper = joinWord(resp.register[14], resp.register[15]);
+        console.log(CntInCapper);
         //------------------------------------------Labeller----------------------------------------------
         Labellerct = CntOutLabeller // NOTE: igualar al contador de salida
         if (!LabellerONS && Labellerct) {
