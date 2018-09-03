@@ -779,7 +779,8 @@ client4.on('connect', function(err) {
 
         CntInCaseSealer = joinWord(resp.register[2], resp.register[3]);
         CntOutCaseSealer = joinWord(resp.register[8], resp.register[9]);
-        CntOutEOL = joinWord(resp.register[0], resp.register[1]);
+        CntOutEOL =  CntOutCaseSealer;
+        //CntOutEOL = joinWord(resp.register[0], resp.register[1]);
         //------------------------------------------CasePacker----------------------------------------------
         CasePackerct = CntOutCasePacker // NOTE: igualar al contador de salida
         if (!CasePackerONS && CasePackerct) {
