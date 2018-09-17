@@ -847,7 +847,7 @@ client4.on('connect', function(err) {
           ST: CasePackerstate,
           CPQI: CntInCasePacker,
           CPQO: CntOutCasePacker,
-          CPQR: CasePackerdeltaRejected,
+          //CPQR: CasePackerdeltaRejected,
           SP: CasePackerspeed
         }
         if (CasePackerflagPrint == 1) {
