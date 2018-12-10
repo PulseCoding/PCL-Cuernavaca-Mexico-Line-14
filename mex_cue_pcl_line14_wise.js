@@ -270,39 +270,6 @@ var joinWord = function( num1, num2) {
   return parseInt(bits, 2);
 };
 
-//PubNub --------------------------------------------------------------------------------------------------------------------
-setInterval(function() {
-  if (secPubNub >= 60 * 5) {
-
-    var idle = function() {
-      i = 0;
-      text2send = [];
-      for (var k = 0; k < files.length; k++) { //Verificar los archivos
-        var stats = fs.statSync("C:/PULSE/L14_LOGS/" + files[k]);
-        var mtime = new Date(stats.mtime).getTime();
-        if (mtime < (Date.now() - (15 * 60 * 1000)) && files[k].indexOf("serialbox") == -1) {
-          flagInfo2Send = 1;
-          text2send[i] = files[k];
-          i++;
-        }
-      }
-    };
-    secPubNub = 0;
-    publishConfig = {
-      channel: "Cue_PCL_Monitor",
-      message: {
-        line: "14",
-        tt: Date.now(),
-        machines: text2send
-
-      }
-    };
-    senderData();
-  }
-  secPubNub++;
-}, 1000);
-//PubNub --------------------------------------------------------------------------------------------------------------------
-
 client1.on('connect', function(err) {
   intId1 =
     setInterval(function() {
