@@ -262,7 +262,7 @@ var joinWord = function( num1, num2) {
 
   for (i = 0; i < bin1.length; i++) {
     newNum[31 - i] = bin1[(bin1.length - 1) - i];
- 
+  }
   for (i = 0; i < bin2.length; i++) {
     newNum[15 - i] = bin2[(bin2.length - 1) - i];
   }
@@ -271,7 +271,6 @@ var joinWord = function( num1, num2) {
 };
 
 //PubNub --------------------------------------------------------------------------------------------------------------------
-/*
 setInterval(function() {
   if (secPubNub >= 60 * 5) {
 
@@ -298,7 +297,10 @@ setInterval(function() {
 
       }
     };
-   // sender*/
+    senderData();
+  }
+  secPubNub++;
+}, 1000);
 //PubNub --------------------------------------------------------------------------------------------------------------------
 
 client1.on('connect', function(err) {
