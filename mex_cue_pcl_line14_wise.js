@@ -99,25 +99,43 @@ var Capperct = null,
       }
     }
   })()
-var Fillerct = null,
-  Fillerresults = null,
-  CntInFiller = null,
-  CntOutFiller = null,
-  Filleractual = 0,
-  Fillertime = 0,
-  Fillersec = 0,
-  FillerflagStopped = false,
-  Fillerstate = 0,
-  Fillerspeed = 0,
-  FillerspeedTemp = 0,
-  FillerflagPrint = 0,
-  FillersecStop = 0,
-  FillerONS = false,
-  FillertimeStop = 60, //NOTE: Timestop en segundos
-  FillerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-  FillerflagRunning = false,
-  FillerBlock,
-  FillerWait;
+  var Fillerct = null,
+      Fillerresults = null,
+      CntInFiller = null,
+      CntOutFiller = null,
+      Filleractual = 0,
+      Fillertime = 0,
+      Fillersec = 0,
+      FillerflagStopped = false,
+      Fillerstate = 0,
+      Fillerspeed = 0,
+      FillerspeedTemp = 0,
+      FillerflagPrint = 0,
+      FillersecStop = 0,
+      FillerONS = false,
+      FillerdeltaRejected = null,
+      FillertimeStop = 60, //NOTE: Timestop en segundos
+      FillerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+      FillerflagRunning = false,
+      FillerRejectFlag = false,
+      FillerReject,
+      FillerVerify = (function(){
+            try{
+              FillerReject = fs.readFileSync('FillerRejected.json')
+              if(FillerReject.toString().indexOf('}') > 0 && FillerReject.toString().indexOf('{\"rejected\":') != -1){
+                FillerReject = JSON.parse(FillerReject)
+              }else{
+                throw 12121212
+              }
+            }catch(err){
+              if(err.code == 'ENOENT' || err == 12121212){
+                fs.writeFileSync('FillerRejected.json','{"rejected":0}') //NOTE: Change the object to what it usually is.
+                FillerReject = {
+                  rejected : 0
+                }                 
+              }
+            }
+          })();
 
 var CaseFormerct = null,
   CaseFormerresults = null,
@@ -318,19 +336,11 @@ client1.on('connect', function(err) {
             LabellersecStop = Date.now()
           }
           if ((Date.now() - (LabellertimeStop * 1000)) >= LabellersecStop) {
-            Labellerspeed = 0
+            //Labellerspeed = 0
             Labellerstate = 2
             LabellerspeedTemp = Labellerct
             LabellerflagStopped = true
             LabellerflagRunning = false
-            if (CntInLabeller - CntOutLabeller - LabellerReject.rejected != 0 && !LabellerRejectFlag) {
-              LabellerdeltaRejected = CntInLabeller - CntOutLabeller - LabellerReject.rejected
-              LabellerReject.rejected = CntInLabeller - CntOutLabeller
-              fs.writeFileSync('LabellerRejected.json', '{"rejected": ' + LabellerReject.rejected + '}')
-              LabellerRejectFlag = true
-            } else {
-              LabellerdeltaRejected = null
-            }
             LabellerflagPrint = 1
           }
         }
@@ -356,7 +366,7 @@ client1.on('connect', function(err) {
           ST: Labellerstate,
           CPQI: CntInLabeller,
           CPQO: CntOutLabeller,
-          CPQR: LabellerdeltaRejected,
+          //CPQR: LabellerdeltaRejected,
           SP: Labellerspeed
         }
         if (LabellerflagPrint == 1) {
@@ -495,19 +505,11 @@ client2.on('connect', function(err) {
             CappersecStop = Date.now()
           }
           if ((Date.now() - (CappertimeStop * 1000)) >= CappersecStop) {
-            Capperspeed = 0
+            //Capperspeed = 0
             Capperstate = 2
             CapperspeedTemp = Capperct
             CapperflagStopped = true
             CapperflagRunning = false
-            if (CntInCapper - CntOutCapper - CapperReject.rejected != 0 && !CapperRejectFlag) {
-              CapperdeltaRejected = CntInCapper - CntOutCapper - CapperReject.rejected
-              CapperReject.rejected = CntInCapper - CntOutCapper
-              fs.writeFileSync('CapperRejected.json', '{"rejected": ' + CapperReject.rejected + '}')
-              CapperRejectFlag = true
-            } else {
-              CapperdeltaRejected = null
-            }
             CapperflagPrint = 1
           }
         }
@@ -534,7 +536,7 @@ client2.on('connect', function(err) {
           ST: Capperstate,
           CPQI: CntInCapper,
           CPQO: CntOutCapper,
-          CPQR: CapperdeltaRejected,
+          //CPQR: CapperdeltaRejected,
           SP: Capperspeed
         }
         if (CapperflagPrint == 1) {
@@ -574,7 +576,7 @@ client2.on('connect', function(err) {
             FillersecStop = Date.now()
           }
           if ((Date.now() - (FillertimeStop * 1000)) >= FillersecStop) {
-            Fillerspeed = 0
+            //Fillerspeed = 0
             Fillerstate = 2
             FillerspeedTemp = Fillerct
             FillerflagStopped = true
@@ -775,19 +777,11 @@ client4.on('connect', function(err) {
             CasePackersecStop = Date.now()
           }
           if ((Date.now() - (CasePackertimeStop * 1000)) >= CasePackersecStop) {
-            CasePackerspeed = 0
+            //CasePackerspeed = 0
             CasePackerstate = 2
             CasePackerspeedTemp = CasePackerct
             CasePackerflagStopped = true
             CasePackerflagRunning = false
-            if (CntInCasePacker - CntOutCasePacker - CasePackerReject.rejected != 0 && !CasePackerRejectFlag) {
-              CasePackerdeltaRejected = CntInCasePacker - CntOutCasePacker - CasePackerReject.rejected
-              CasePackerReject.rejected = CntInCasePacker - CntOutCasePacker
-              fs.writeFileSync('CasePackerRejected.json', '{"rejected": ' + CasePackerReject.rejected + '}')
-              CasePackerRejectFlag = true
-            } else {
-              CasePackerdeltaRejected = null
-            }
             CasePackerflagPrint = 1
           }
         }
@@ -912,3 +906,24 @@ client4.on('error', function(err) {
 client4.on('close', function() {
   clearInterval(intId4);
 });
+function getRejects() {
+  var FillerDif = CntInFiller - CntOutFiller
+  fs.appendFileSync('C:/PULSE/L14_LOGS/mex_pcl_Filler_L14.log', 'tt=' + Date.now() + ',var=CPQR,val=' + eval(FillerDif - FillerReject.rejected) + '\n')
+  FillerReject.rejected = FillerDif
+  fs.writeFileSync('FillerRejected.json', '{"rejected": ' + FillerReject.rejected + '}')
+  var LabellerDif = CntInLabeller - CntOutLabeller
+  fs.appendFileSync('C:/PULSE/L14_LOGS/mex_pcl_Labeller_L14.log', 'tt=' + Date.now() + ',var=CPQR,val=' + eval(LabellerDif - LabellerReject.rejected) + '\n')
+  LabellerReject.rejected = LabellerDif
+  fs.writeFileSync('LabellerRejected.json', '{"rejected": ' + LabellerReject.rejected + '}')
+  var CapperDif = CntInCapper - CntOutCapper
+  fs.appendFileSync('C:/PULSE/L14_LOGS/mex_pcl_Capper_L14.log', 'tt=' + Date.now() + ',var=CPQR,val=' + eval(CapperDif - CapperReject.rejected) + '\n')
+  CapperReject.rejected = CapperDif
+  fs.writeFileSync('CapperRejected.json', '{"rejected": ' + CapperReject.rejected + '}')
+  var CasePackerDif = CntInCasePacker - CntOutCasePacker
+  fs.appendFileSync('C:/PULSE/L14_LOGS/mex_pcl_CasePacker_L14.log', 'tt=' + Date.now() + ',var=CPQR,val=' + eval(CasePackerDif - CasePackerReject.rejected) + '\n')
+  CasePackerReject.rejected = CasePackerDif
+  fs.writeFileSync('CasePackerRejected.json', '{"rejected": ' + CasePackerReject.rejected + '}')
+
+}
+setTimeout(getRejects, 60000);
+var storeReject = setInterval(getRejects, 1740000);
