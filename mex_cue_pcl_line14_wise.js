@@ -1,267 +1,269 @@
 var fs = require('fs');
 var modbus = require('jsmodbus');
 var PubNub = require('pubnub');
-var Labellerct = null,
-  Labellerresults = null,
-  CntInLabeller = null,
-  CntOutLabeller = null,
-  Labelleractual = 0,
-  Labellertime = 0,
-  Labellersec = 0,
-  LabellerflagStopped = false,
-  Labellerstate = 0,
-  Labellerspeed = 0,
-  LabellerspeedTemp = 0,
-  LabellerflagPrint = 0,
-  LabellersecStop = 0,
-  LabellerdeltaRejected = null,
-  LabellerONS = false,
-  LabellertimeStop = 60, //NOTE: Timestop
-  LabellerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-  LabellerflagRunning = false,
-  LabellerRejectFlag = false,
-  LabellerReject,
-  LabellerWait,
-  LabellerBlock,
-  LabellerVerify = (function() {
-    try {
-      LabellerReject = fs.readFileSync('LabellerRejected.json');
-      if (LabellerReject.toString().indexOf('}') > 0 && LabellerReject.toString().indexOf('{\"rejected\":') != -1) {
-        LabellerReject = JSON.parse(LabellerReject);
-      } else {
-        throw 12121212;
-      }
-    } catch (err) {
-      if (err.code == 'ENOENT' || err == 12121212) {
-        fs.writeFileSync('LabellerRejected.json', '{"rejected":0}'); //NOTE: Change the object to what it usually is.
-        LabellerReject = {
-          rejected: 0
-        };
-      }
-    }
-  })();
-var intId1, intId2, intId3, intId4;
-var Depuckerct = null,
-  Depuckerresults = null,
-  CntInDepucker = null,
-  CntOutDepucker = null,
-  Depuckeractual = 0,
-  Depuckertime = 0,
-  Depuckersec = 0,
-  DepuckerflagStopped = false,
-  Depuckerstate = 0,
-  Depuckerspeed = 0,
-  DepuckerspeedTemp = 0,
-  DepuckerflagPrint = 0,
-  DepuckersecStop = 0,
-  DepuckerONS = false,
-  DepuckertimeStop = 60, //NOTE: Timestop en segundos
-  DepuckerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-  DepuckerflagRunning = false,
-  DepuckerBlock = 0;
-
-var Capperct = null,
-  Capperresults = null,
-  CntInCapper = null,
-  CntOutCapper = null,
-  Capperactual = 0,
-  Cappertime = 0,
-  Cappersec = 0,
-  CapperflagStopped = false,
-  Capperstate = 0,
-  Capperspeed = 0,
-  CapperspeedTemp = 0,
-  CapperflagPrint = 0,
-  CappersecStop = 0,
-  CapperdeltaRejected = null,
-  CapperONS = false,
-  CappertimeStop = 60, //NOTE: Timestop
-  CapperWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-  CapperflagRunning = false,
-  CapperRejectFlag = false,
-  CapperReject,
-  CapperWait,
-  CapperBlock,
-  CapperVerify = (function() {
-    try {
-      CapperReject = fs.readFileSync('CapperRejected.json')
-      if (CapperReject.toString().indexOf('}') > 0 && CapperReject.toString().indexOf('{\"rejected\":') != -1) {
-        CapperReject = JSON.parse(CapperReject)
-      } else {
-        throw 12121212
-      }
-    } catch (err) {
-      if (err.code == 'ENOENT' || err == 12121212) {
-        fs.writeFileSync('CapperRejected.json', '{"rejected":0}') //NOTE: Change the object to what it usually is.
-        CapperReject = {
-          rejected: 0
+try{
+  var secPubNub=0;
+  var Labellerct = null,
+    Labellerresults = null,
+    CntInLabeller = null,
+    CntOutLabeller = null,
+    Labelleractual = 0,
+    Labellertime = 0,
+    Labellersec = 0,
+    LabellerflagStopped = false,
+    Labellerstate = 0,
+    Labellerspeed = 0,
+    LabellerspeedTemp = 0,
+    LabellerflagPrint = 0,
+    LabellersecStop = 0,
+    LabellerdeltaRejected = null,
+    LabellerONS = false,
+    LabellertimeStop = 60, //NOTE: Timestop
+    LabellerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+    LabellerflagRunning = false,
+    LabellerRejectFlag = false,
+    LabellerReject,
+    LabellerWait,
+    LabellerBlock,
+    LabellerVerify = (function() {
+      try {
+        LabellerReject = fs.readFileSync('LabellerRejected.json');
+        if (LabellerReject.toString().indexOf('}') > 0 && LabellerReject.toString().indexOf('{\"rejected\":') != -1) {
+          LabellerReject = JSON.parse(LabellerReject);
+        } else {
+          throw 12121212;
+        }
+      } catch (err) {
+        if (err.code == 'ENOENT' || err == 12121212) {
+          fs.writeFileSync('LabellerRejected.json', '{"rejected":0}'); //NOTE: Change the object to what it usually is.
+          LabellerReject = {
+            rejected: 0
+          };
         }
       }
-    }
-  })()
+    })();
+  var Depuckerct = null,
+    Depuckerresults = null,
+    CntInDepucker = null,
+    CntOutDepucker = null,
+    Depuckeractual = 0,
+    Depuckertime = 0,
+    Depuckersec = 0,
+    DepuckerflagStopped = false,
+    Depuckerstate = 0,
+    Depuckerspeed = 0,
+    DepuckerspeedTemp = 0,
+    DepuckerflagPrint = 0,
+    DepuckersecStop = 0,
+    DepuckerONS = false,
+    DepuckertimeStop = 60, //NOTE: Timestop en segundos
+    DepuckerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+    DepuckerflagRunning = false,
+    DepuckerBlock = 0;
+  var Capperct = null,
+    Capperresults = null,
+    CntInCapper = null,
+    CntOutCapper = null,
+    Capperactual = 0,
+    Cappertime = 0,
+    Cappersec = 0,
+    CapperflagStopped = false,
+    Capperstate = 0,
+    Capperspeed = 0,
+    CapperspeedTemp = 0,
+    CapperflagPrint = 0,
+    CappersecStop = 0,
+    CapperdeltaRejected = null,
+    CapperONS = false,
+    CappertimeStop = 60, //NOTE: Timestop
+    CapperWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+    CapperflagRunning = false,
+    CapperRejectFlag = false,
+    CapperReject,
+    CapperWait,
+    CapperBlock,
+    CapperVerify = (function() {
+      try {
+        CapperReject = fs.readFileSync('CapperRejected.json')
+        if (CapperReject.toString().indexOf('}') > 0 && CapperReject.toString().indexOf('{\"rejected\":') != -1) {
+          CapperReject = JSON.parse(CapperReject)
+        } else {
+          throw 12121212
+        }
+      } catch (err) {
+        if (err.code == 'ENOENT' || err == 12121212) {
+          fs.writeFileSync('CapperRejected.json', '{"rejected":0}') //NOTE: Change the object to what it usually is.
+          CapperReject = {
+            rejected: 0
+          }
+        }
+      }
+    })()
   var Fillerct = null,
-      Fillerresults = null,
-      CntInFiller = null,
-      CntOutFiller = null,
-      Filleractual = 0,
-      Fillertime = 0,
-      Fillersec = 0,
-      FillerflagStopped = false,
-      Fillerstate = 0,
-      Fillerspeed = 0,
-      FillerspeedTemp = 0,
-      FillerflagPrint = 0,
-      FillersecStop = 0,
-      FillerONS = false,
-      FillerdeltaRejected = null,
-      FillertimeStop = 60, //NOTE: Timestop en segundos
-      FillerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-      FillerflagRunning = false,
-      FillerRejectFlag = false,
-      FillerReject,
-      FillerVerify = (function(){
-            try{
-              FillerReject = fs.readFileSync('FillerRejected.json')
-              if(FillerReject.toString().indexOf('}') > 0 && FillerReject.toString().indexOf('{\"rejected\":') != -1){
-                FillerReject = JSON.parse(FillerReject)
-              }else{
-                throw 12121212
-              }
-            }catch(err){
-              if(err.code == 'ENOENT' || err == 12121212){
-                fs.writeFileSync('FillerRejected.json','{"rejected":0}') //NOTE: Change the object to what it usually is.
-                FillerReject = {
-                  rejected : 0
-                }                 
-              }
-            }
-          })();
-
-var CaseFormerct = null,
-  CaseFormerresults = null,
-  CntInCaseFormer = null,
-  CntOutCaseFormer = null,
-  CaseFormeractual = 0,
-  CaseFormertime = 0,
-  CaseFormersec = 0,
-  CaseFormerflagStopped = false,
-  CaseFormerstate = 0,
-  CaseFormerspeed = 0,
-  CaseFormerspeedTemp = 0,
-  CaseFormerflagPrint = 0,
-  CaseFormersecStop = 0,
-  CaseFormerONS = false,
-  CaseFormertimeStop = 60, //NOTE: Timestop en segundos
-  CaseFormerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-  CaseFormerflagRunning = false,
-  CaseFormerWait,
-  CaseFormerBlock;
-var CasePackerct = null,
-  CasePackerresults = null,
-  CntInCasePacker = null,
-  CntOutCasePacker = null,
-  CasePackeractual = 0,
-  CasePackertime = 0,
-  CasePackersec = 0,
-  CasePackerflagStopped = false,
-  CasePackerstate = 0,
-  CasePackerspeed = 0,
-  CasePackerspeedTemp = 0,
-  CasePackerflagPrint = 0,
-  CasePackersecStop = 0,
-  CasePackerdeltaRejected = null,
-  CasePackerONS = false,
-  CasePackertimeStop = 60, //NOTE: Timestop
-  CasePackerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-  CasePackerflagRunning = false,
-  CasePackerRejectFlag = false,
-  CasePackerReject,
-  CasePackerWaitBox,
-  CasePackerWaitBot,
-  CasePackerBlock,
-  CasePackerVerify = (function() {
-    try {
-      CasePackerReject = fs.readFileSync('CasePackerRejected.json')
-      if (CasePackerReject.toString().indexOf('}') > 0 && CasePackerReject.toString().indexOf('{\"rejected\":') != -1) {
-        CasePackerReject = JSON.parse(CasePackerReject)
-      } else {
-        throw 12121212
-      }
-    } catch (err) {
-      if (err.code == 'ENOENT' || err == 12121212) {
-        fs.writeFileSync('CasePackerRejected.json', '{"rejected":0}') //NOTE: Change the object to what it usually is.
-        CasePackerReject = {
-          rejected: 0
+    Fillerresults = null,
+    CntInFiller = null,
+    CntOutFiller = null,
+    Filleractual = 0,
+    Fillertime = 0,
+    Fillersec = 0,
+    FillerflagStopped = false,
+    Fillerstate = 0,
+    Fillerspeed = 0,
+    FillerspeedTemp = 0,
+    FillerflagPrint = 0,
+    FillersecStop = 0,
+    FillerONS = false,
+    FillerdeltaRejected = null,
+    FillertimeStop = 60, //NOTE: Timestop en segundos
+    FillerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+    FillerflagRunning = false,
+    FillerRejectFlag = false,
+    FillerReject,
+    FillerVerify = (function(){
+      try{
+        FillerReject = fs.readFileSync('FillerRejected.json')
+        if(FillerReject.toString().indexOf('}') > 0 && FillerReject.toString().indexOf('{\"rejected\":') != -1){
+          FillerReject = JSON.parse(FillerReject)
+        }else{
+          throw 12121212
+        }
+      }catch(err){
+        if(err.code == 'ENOENT' || err == 12121212){
+          fs.writeFileSync('FillerRejected.json','{"rejected":0}') //NOTE: Change the object to what it usually is.
+          FillerReject = {
+            rejected : 0
+          }                 
         }
       }
-    }
-  })()
-
-var secPubNub=0;
-var CaseSealerct = null,
-  CaseSealerresults = null,
-  CntInCaseSealer = null,
-  CntOutCaseSealer = null,
-  CaseSealeractual = 0,
-  CaseSealertime = 0,
-  CaseSealersec = 0,
-  CaseSealerflagStopped = false,
-  CaseSealerstate = 0,
-  CaseSealerspeed = 0,
-  CaseSealerspeedTemp = 0,
-  CaseSealerflagPrint = 0,
-  CaseSealersecStop = 0,
-  CaseSealerONS = false,
-  CaseSealertimeStop = 60, //NOTE: Timestop en segundos
-  CaseSealerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-  CaseSealerflagRunning = false,
-  CaseSelaerWait;
+    })();
+  var CaseFormerct = null,
+    CaseFormerresults = null,
+    CntInCaseFormer = null,
+    CntOutCaseFormer = null,
+    CaseFormeractual = 0,
+    CaseFormertime = 0,
+    CaseFormersec = 0,
+    CaseFormerflagStopped = false,
+    CaseFormerstate = 0,
+    CaseFormerspeed = 0,
+    CaseFormerspeedTemp = 0,
+    CaseFormerflagPrint = 0,
+    CaseFormersecStop = 0,
+    CaseFormerONS = false,
+    CaseFormertimeStop = 60, //NOTE: Timestop en segundos
+    CaseFormerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+    CaseFormerflagRunning = false,
+    CaseFormerWait,
+    CaseFormerBlock;
+  var CasePackerct = null,
+    CasePackerresults = null,
+    CntInCasePacker = null,
+    CntOutCasePacker = null,
+    CasePackeractual = 0,
+    CasePackertime = 0,
+    CasePackersec = 0,
+    CasePackerflagStopped = false,
+    CasePackerstate = 0,
+    CasePackerspeed = 0,
+    CasePackerspeedTemp = 0,
+    CasePackerflagPrint = 0,
+    CasePackersecStop = 0,
+    CasePackerdeltaRejected = null,
+    CasePackerONS = false,
+    CasePackertimeStop = 60, //NOTE: Timestop
+    CasePackerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+    CasePackerflagRunning = false,
+    CasePackerRejectFlag = false,
+    CasePackerReject,
+    CasePackerWaitBox,
+    CasePackerWaitBot,
+    CasePackerBlock,
+    CasePackerVerify = (function() {
+      try {
+        CasePackerReject = fs.readFileSync('CasePackerRejected.json')
+        if (CasePackerReject.toString().indexOf('}') > 0 && CasePackerReject.toString().indexOf('{\"rejected\":') != -1) {
+          CasePackerReject = JSON.parse(CasePackerReject)
+        } else {
+          throw 12121212
+        }
+      } catch (err) {
+        if (err.code == 'ENOENT' || err == 12121212) {
+          fs.writeFileSync('CasePackerRejected.json', '{"rejected":0}') //NOTE: Change the object to what it usually is.
+          CasePackerReject = {
+            rejected: 0
+          }
+        }
+      }
+    })()
+  var CaseSealerct = null,
+    CaseSealerresults = null,
+    CntInCaseSealer = null,
+    CntOutCaseSealer = null,
+    CaseSealeractual = 0,
+    CaseSealertime = 0,
+    CaseSealersec = 0,
+    CaseSealerflagStopped = false,
+    CaseSealerstate = 0,
+    CaseSealerspeed = 0,
+    CaseSealerspeedTemp = 0,
+    CaseSealerflagPrint = 0,
+    CaseSealersecStop = 0,
+    CaseSealerONS = false,
+    CaseSealertimeStop = 60, //NOTE: Timestop en segundos
+    CaseSealerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+    CaseSealerflagRunning = false,
+    CaseSelaerWait;
   var CntOutEOL=null,
-      secEOL=0;
-
-var client1 = modbus.client.tcp.complete({
-  'host': "192.168.10.116",
-  'port': 502,
-  'autoReconnect': true,
-  'timeout': 60000,
-  'logEnabled': true,
-  'reconnectTimeout': 30000
-});
-var client2 = modbus.client.tcp.complete({
-  'host': "192.168.10.117",
-  'port': 502,
-  'autoReconnect': true,
-  'timeout': 60000,
-  'logEnabled': true,
-  'reconnectTimeout': 30000
-});
-var client3 = modbus.client.tcp.complete({
-  'host': "192.168.10.112",
-  'port': 502,
-  'autoReconnect': true,
-  'timeout': 60000,
-  'logEnabled': true,
-  'reconnectTimeout': 30000
-});
-var client4 = modbus.client.tcp.complete({
-  'host': "192.168.10.115",
-  'port': 502,
-  'autoReconnect': true,
-  'timeout': 60000,
-  'logEnabled': true,
-  'reconnectTimeout': 30000
-});
-
-var pubnub = new PubNub({
-  publishKey: "pub-c-8d024e5b-23bc-4ce8-ab68-b39b00347dfb",
-  subscribeKey: "sub-c-c3b3aa54-b44b-11e7-895e-c6a8ff6a3d85",
-  uuid: "CUE_PCL_LINE14"
-});
-
-var senderData = function() {
-  pubnub.publish(publishConfig, function(status, response) {});
-};
-
+    secEOL=0;
+  var publishConfig;
+  var intId1, intId2, intId3, intId4;
+  var files = fs.readdirSync("C:/PULSE/L14_LOGS/"); //Leer documentos
+	var text2send = []; //Vector a enviar
+	var i = 0;
+  var pubnub = new PubNub({
+    publishKey: "pub-c-8d024e5b-23bc-4ce8-ab68-b39b00347dfb",
+    subscribeKey: "sub-c-c3b3aa54-b44b-11e7-895e-c6a8ff6a3d85",
+    uuid: "CUE_PCL_LINE14"
+  });
+  var senderData = function() {
+    pubnub.publish(publishConfig, function(status, response) {});
+  };
+  
+  var client1 = modbus.client.tcp.complete({
+    'host': "192.168.10.116",
+    'port': 502,
+    'autoReconnect': true,
+    'timeout': 60000,
+    'logEnabled': true,
+    'reconnectTimeout': 30000
+  });
+  var client2 = modbus.client.tcp.complete({
+    'host': "192.168.10.117",
+    'port': 502,
+    'autoReconnect': true,
+    'timeout': 60000,
+    'logEnabled': true,
+    'reconnectTimeout': 30000
+  });
+  var client3 = modbus.client.tcp.complete({
+    'host': "192.168.10.112",
+    'port': 502,
+    'autoReconnect': true,
+    'timeout': 60000,
+    'logEnabled': true,
+    'reconnectTimeout': 30000
+  });
+  var client4 = modbus.client.tcp.complete({
+    'host': "192.168.10.115",
+    'port': 502,
+    'autoReconnect': true,
+    'timeout': 60000,
+    'logEnabled': true,
+    'reconnectTimeout': 30000
+  });
+} catch (err){
+  fs.appendFileSync("error_declarations.log", err + '\n');
+}
 
 try {
   client1.connect();
@@ -287,28 +289,52 @@ var joinWord = function( num1, num2) {
   bits = newNum.join("");
   return parseInt(bits, 2);
 };
+setInterval(function() {
+  //PubNub --------------------------------------------------------------------------------------------------------------------
+  if (secPubNub >= 60 * 5) {
+
+    var idle = function() {
+      i = 0;
+      text2send = [];
+      for (var k = 0; k < files.length; k++) { //Verificar los archivos
+        var stats = fs.statSync("C:/PULSE/L14_LOGS/" + files[k]);
+        var mtime = new Date(stats.mtime).getTime();
+        if (mtime < (Date.now() - (15 * 60 * 1000)) && files[k].indexOf("serialbox") == -1) {
+          flagInfo2Send = 1;
+          text2send[i] = files[k];
+          i++;
+        }
+      }
+    };
+    secPubNub = 0;
+    idle();
+    publishConfig = {
+      channel: "Cue_PCL_Monitor",
+      message: {
+        line: "14",
+        tt: Date.now(),
+        machines: text2send
+      }
+    };
+    senderData();
+  }
+  secPubNub++;
+  //PubNub --------------------------------------------------------------------------------------------------------------------
+}, 1000);
 
 client1.on('connect', function(err) {
   intId1 =
     setInterval(function() {
       client1.readCoils(0, 7).then(function(resp) {
-
-        // resp will look like { response : [TCP|RTU]Response, request: [TCP|RTU]Request }
-        // the data will be located in resp.response.body.coils: <Array>, resp.response.body.payload: <Buffer>
         LabellerWait = resp.coils[1];
         LabellerBlock = resp.coils[3];
         DepuckerBlock = resp.coils[2];
         CapperWait = resp.coils[6];
-        //console.log(resp);
-        //console.log(resp);
-
       }, console.error);
-
       client1.readHoldingRegisters(0, 16).then(function(resp) {
         CntInLabeller = joinWord(resp.register[10], resp.register[11]);
         CntOutLabeller = joinWord(resp.register[8], resp.register[9]);
         CntInCapper = joinWord(resp.register[14], resp.register[15]);
-        //console.log(joinWord(resp.register[14], resp.register[15]));
         //------------------------------------------Labeller----------------------------------------------
         Labellerct = CntOutLabeller // NOTE: igualar al contador de salida
         if (!LabellerONS && Labellerct) {
@@ -361,7 +387,6 @@ client1.on('connect', function(err) {
             Labellerstate = 3;
           }
         }
-
         Labellerresults = {
           ST: Labellerstate,
           CPQI: CntInLabeller,
@@ -395,15 +420,9 @@ client2.on('connect', function(err) {
   intId2 =
     setInterval(function() {
       client2.readCoils(0, 7).then(function(resp) {
-
-        // resp will look like { response : [TCP|RTU]Response, request: [TCP|RTU]Request }
-        // the data will be located in resp.response.body.coils: <Array>, resp.response.body.payload: <Buffer>
         CapperWait = resp.coils[4];
         FillerBlock = resp.coils[0];
         FillerWait = resp.coils[1];
-        //console.log(resp);
-
-
       }, console.error);
 
       client2.readHoldingRegisters(0, 15).then(function(resp) {
@@ -635,15 +654,9 @@ client3.on('connect', function(err) {
   intId3 =
     setInterval(function() {
       client3.readCoils(0, 7).then(function(resp) {
-
-        // resp will look like { response : [TCP|RTU]Response, request: [TCP|RTU]Request }
-        // the data will be located in resp.response.body.coils: <Array>, resp.response.body.payload: <Buffer>
         CaseFormerBlock = resp.coils[2];
         CasePackerWaitBot = resp.coils[0];
         CasePackerWaitBox = resp.coils[1];
-        //console.log(resp);
-        //console.log(resp);
-
       }, console.error);
 
       client3.readHoldingRegisters(0, 15).then(function(resp) {
@@ -731,25 +744,17 @@ client3.on('close', function() {
 });
 
 client4.on('connect', function(err) {
-  intId3 =
+  intId4 =
     setInterval(function() {
       client4.readCoils(0, 7).then(function(resp) {
-
-        // resp will look like { response : [TCP|RTU]Response, request: [TCP|RTU]Request }
-        // the data will be located in resp.response.body.coils: <Array>, resp.response.body.payload: <Buffer>
         CasePackerBlock = resp.coils[3];
         CaseSelaerWait = resp.coils[2];
-        //console.log(resp);
-        //console.log(resp);
-
       }, console.error);
 
       client4.readHoldingRegisters(0, 15).then(function(resp) {
-
         CntInCaseSealer = joinWord(resp.register[2], resp.register[3]);
         CntOutCaseSealer = joinWord(resp.register[8], resp.register[9]);
-        CntOutEOL =  CntOutCaseSealer;
-        //CntOutEOL = joinWord(resp.register[0], resp.register[1]);
+        CntOutEOL =  joinWord(resp.register[8], resp.register[9]);
         //------------------------------------------CasePacker----------------------------------------------
         CasePackerct = CntOutCasePacker // NOTE: igualar al contador de salida
         if (!CasePackerONS && CasePackerct) {
@@ -927,3 +932,19 @@ function getRejects() {
 }
 setTimeout(getRejects, 60000);
 var storeReject = setInterval(getRejects, 1740000);
+//------------------------------Cerrar-código------------------------------
+var shutdown = function() {
+  client1.close()
+  client2.close()
+  client3.close()
+  client4.close()
+  process.exit(0)
+}
+
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
+//------------------------------Cerrar-código------------------------------
+} catch (err) {
+fs.appendFileSync("error.log", err + '\n');
+}
+
