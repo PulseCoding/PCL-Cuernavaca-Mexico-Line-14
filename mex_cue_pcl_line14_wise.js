@@ -273,7 +273,7 @@ try {
 } catch (err) {
   fs.appendFileSync("error_connection.log", err + '\n');
 }
-
+try {
 var joinWord = function( num1, num2) {
   var bits = "00000000000000000000000000000000";
   var bin1 = Number(num1).toString(2),
