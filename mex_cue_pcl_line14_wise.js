@@ -2,103 +2,103 @@ var fs = require('fs');
 var modbus = require('jsmodbus');
 var PubNub = require('pubnub');
 
-  var secPubNub=0;
-  var Labellerct = null,
-    Labellerresults = null,
-    CntInLabeller = null,
-    CntOutLabeller = null,
-    Labelleractual = 0,
-    Labellertime = 0,
-    Labellersec = 0,
-    LabellerflagStopped = false,
-    Labellerstate = 0,
-    Labellerspeed = 0,
-    LabellerspeedTemp = 0,
-    LabellerflagPrint = 0,
-    LabellersecStop = 0,
-    LabellerdeltaRejected = null,
-    LabellerONS = false,
-    LabellertimeStop = 60, //NOTE: Timestop
-    LabellerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-    LabellerflagRunning = false,
-    LabellerRejectFlag = false,
-    LabellerReject,
-    LabellerWait,
-    LabellerBlock,
-    LabellerVerify = (function() {
-      try {
-        LabellerReject = fs.readFileSync('LabellerRejected.json');
-        if (LabellerReject.toString().indexOf('}') > 0 && LabellerReject.toString().indexOf('{\"rejected\":') != -1) {
-          LabellerReject = JSON.parse(LabellerReject);
-        } else {
-          throw 12121212;
-        }
-      } catch (err) {
-        if (err.code == 'ENOENT' || err == 12121212) {
-          fs.writeFileSync('LabellerRejected.json', '{"rejected":0}'); //NOTE: Change the object to what it usually is.
-          LabellerReject = {
-            rejected: 0
-          };
+var secPubNub=0;
+var Labellerct = null,
+  Labellerresults = null,
+  CntInLabeller = null,
+  CntOutLabeller = null,
+  Labelleractual = 0,
+  Labellertime = 0,
+  Labellersec = 0,
+  LabellerflagStopped = false,
+  Labellerstate = 0,
+  Labellerspeed = 0,
+  LabellerspeedTemp = 0,
+  LabellerflagPrint = 0,
+  LabellersecStop = 0,
+  LabellerdeltaRejected = null,
+  LabellerONS = false,
+  LabellertimeStop = 60, //NOTE: Timestop
+  LabellerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+  LabellerflagRunning = false,
+  LabellerRejectFlag = false,
+  LabellerReject,
+  LabellerWait,
+  LabellerBlock,
+  LabellerVerify = (function() {
+    try {
+      LabellerReject = fs.readFileSync('LabellerRejected.json');
+      if (LabellerReject.toString().indexOf('}') > 0 && LabellerReject.toString().indexOf('{\"rejected\":') != -1) {
+        LabellerReject = JSON.parse(LabellerReject);
+      } else {
+        throw 12121212;
+      }
+    } catch (err) {
+      if (err.code == 'ENOENT' || err == 12121212) {
+        fs.writeFileSync('LabellerRejected.json', '{"rejected":0}'); //NOTE: Change the object to what it usually is.
+        LabellerReject = {
+          rejected: 0
+        };
+      }
+    }
+  })();
+var Depuckerct = null,
+  Depuckerresults = null,
+  CntInDepucker = null,
+  CntOutDepucker = null,
+  Depuckeractual = 0,
+  Depuckertime = 0,
+  Depuckersec = 0,
+  DepuckerflagStopped = false,
+  Depuckerstate = 0,
+  Depuckerspeed = 0,
+  DepuckerspeedTemp = 0,
+  DepuckerflagPrint = 0,
+  DepuckersecStop = 0,
+  DepuckerONS = false,
+  DepuckertimeStop = 60, //NOTE: Timestop en segundos
+  DepuckerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+  DepuckerflagRunning = false,
+  DepuckerBlock = 0;
+var Capperct = null,
+  Capperresults = null,
+  CntInCapper = null,
+  CntOutCapper = null,
+  Capperactual = 0,
+  Cappertime = 0,
+  Cappersec = 0,
+  CapperflagStopped = false,
+  Capperstate = 0,
+  Capperspeed = 0,
+  CapperspeedTemp = 0,
+  CapperflagPrint = 0,
+  CappersecStop = 0,
+  CapperdeltaRejected = null,
+  CapperONS = false,
+  CappertimeStop = 60, //NOTE: Timestop
+  CapperWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
+  CapperflagRunning = false,
+  CapperRejectFlag = false,
+  CapperReject,
+  CapperWait,
+  CapperBlock,
+  CapperVerify = (function() {
+    try {
+      CapperReject = fs.readFileSync('CapperRejected.json')
+      if (CapperReject.toString().indexOf('}') > 0 && CapperReject.toString().indexOf('{\"rejected\":') != -1) {
+        CapperReject = JSON.parse(CapperReject)
+      } else {
+        throw 12121212
+      }
+    } catch (err) {
+      if (err.code == 'ENOENT' || err == 12121212) {
+        fs.writeFileSync('CapperRejected.json', '{"rejected":0}') //NOTE: Change the object to what it usually is.
+        CapperReject = {
+          rejected: 0
         }
       }
-    })();
-  var Depuckerct = null,
-    Depuckerresults = null,
-    CntInDepucker = null,
-    CntOutDepucker = null,
-    Depuckeractual = 0,
-    Depuckertime = 0,
-    Depuckersec = 0,
-    DepuckerflagStopped = false,
-    Depuckerstate = 0,
-    Depuckerspeed = 0,
-    DepuckerspeedTemp = 0,
-    DepuckerflagPrint = 0,
-    DepuckersecStop = 0,
-    DepuckerONS = false,
-    DepuckertimeStop = 60, //NOTE: Timestop en segundos
-    DepuckerWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-    DepuckerflagRunning = false,
-    DepuckerBlock = 0;
-  var Capperct = null,
-    Capperresults = null,
-    CntInCapper = null,
-    CntOutCapper = null,
-    Capperactual = 0,
-    Cappertime = 0,
-    Cappersec = 0,
-    CapperflagStopped = false,
-    Capperstate = 0,
-    Capperspeed = 0,
-    CapperspeedTemp = 0,
-    CapperflagPrint = 0,
-    CappersecStop = 0,
-    CapperdeltaRejected = null,
-    CapperONS = false,
-    CappertimeStop = 60, //NOTE: Timestop
-    CapperWorktime = 0.99, //NOTE: Intervalo de tiempo en minutos para actualizar el log
-    CapperflagRunning = false,
-    CapperRejectFlag = false,
-    CapperReject,
-    CapperWait,
-    CapperBlock,
-    CapperVerify = (function() {
-      try {
-        CapperReject = fs.readFileSync('CapperRejected.json')
-        if (CapperReject.toString().indexOf('}') > 0 && CapperReject.toString().indexOf('{\"rejected\":') != -1) {
-          CapperReject = JSON.parse(CapperReject)
-        } else {
-          throw 12121212
-        }
-      } catch (err) {
-        if (err.code == 'ENOENT' || err == 12121212) {
-          fs.writeFileSync('CapperRejected.json', '{"rejected":0}') //NOTE: Change the object to what it usually is.
-          CapperReject = {
-            rejected: 0
-          }
-        }
-      }
-    })()
+    }
+  })();
   var Fillerct = null,
     Fillerresults = null,
     CntInFiller = null,
@@ -194,7 +194,7 @@ var PubNub = require('pubnub');
           }
         }
       }
-    })()
+    })();
   var CaseSealerct = null,
     CaseSealerresults = null,
     CntInCaseSealer = null,
@@ -261,9 +261,6 @@ var PubNub = require('pubnub');
     'logEnabled': true,
     'reconnectTimeout': 30000
   });
-} catch (err){
-  fs.appendFileSync("error_declarations.log", err + '\n');
-}
 
 try {
   client1.connect();
@@ -273,7 +270,7 @@ try {
 } catch (err) {
   fs.appendFileSync("error_connection.log", err + '\n');
 }
-try {
+
 var joinWord = function( num1, num2) {
   var bits = "00000000000000000000000000000000";
   var bin1 = Number(num1).toString(2),
@@ -417,8 +414,7 @@ client1.on('close', function() {
 });
 
 client2.on('connect', function(err) {
-  intId2 =
-    setInterval(function() {
+  intId2 = setInterval(function() {
       client2.readCoils(0, 7).then(function(resp) {
         CapperWait = resp.coils[4];
         FillerBlock = resp.coils[0];
@@ -651,8 +647,7 @@ client2.on('close', function() {
 });
 
 client3.on('connect', function(err) {
-  intId3 =
-    setInterval(function() {
+  intId3 = setInterval(function() {
       client3.readCoils(0, 7).then(function(resp) {
         CaseFormerBlock = resp.coils[2];
         CasePackerWaitBot = resp.coils[0];
@@ -744,8 +739,7 @@ client3.on('close', function() {
 });
 
 client4.on('connect', function(err) {
-  intId4 =
-    setInterval(function() {
+  intId4 = setInterval(function() {
       client4.readCoils(0, 7).then(function(resp) {
         CasePackerBlock = resp.coils[3];
         CaseSelaerWait = resp.coils[2];
