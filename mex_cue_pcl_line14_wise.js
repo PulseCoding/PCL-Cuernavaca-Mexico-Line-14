@@ -1,7 +1,7 @@
 var fs = require('fs');
 var modbus = require('jsmodbus');
 var PubNub = require('pubnub');
-try{
+
   var secPubNub=0;
   var Labellerct = null,
     Labellerresults = null,
@@ -944,7 +944,5 @@ var shutdown = function() {
 process.on('SIGTERM', shutdown)
 process.on('SIGINT', shutdown)
 //------------------------------Cerrar-código------------------------------
-} catch (err) {
-fs.appendFileSync("error.log", err + '\n');
-}
+
 
